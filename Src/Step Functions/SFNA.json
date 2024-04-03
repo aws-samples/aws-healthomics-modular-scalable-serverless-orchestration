@@ -1,0 +1,77 @@
+{
+    "Comment": "Orchestrate AWS HealthOmics Workflows for Flowcell Samples and QC",
+    "StartAt": "ParallelProcessing",
+    "States": {
+    "ParallelProcessing": {
+        "Type": "Parallel",
+        "Branches": [
+        {
+            "StartAt": "ProcessFlowcellSamples",
+            "States": {
+            "ProcessFlowcellSamples": {
+                "Type": "Map",
+                "InputPath": "$.flowcellSamples",
+                "ItemsPath": "$",
+                "MaxConcurrency": 10,
+                "Iterator": {
+                "StartAt": "InvokeSFNBForSample",
+                "States": {
+                    "InvokeSFNBForSample": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::states:startExecution",
+                    "Parameters": {
+                        "StateMachineArn": "arn:aws:states:us-east-1:123456789012:stateMachine:SFNB",
+                        "Input": {
+                        "WorkflowFileRef.$": "$.fastqFileRef",
+                        "AHOWorkflowID.$": "$.ahoSampleWorkflowId"
+                        }
+                    },
+                    "End": true
+                    }
+                }
+                },
+                "End": true
+            }
+            }
+        },
+        {
+            "StartAt": "WaitForCompletionMap",
+            "States": {
+            "WaitForCompletionMap": {
+                "Type": "Map",
+                "ItemsPath": "$.flowcellSamples",
+                "MaxConcurrency": 10,
+                "Iterator": {
+                "StartAt": "WaitForCompletion",
+                "States": {
+                    "WaitForCompletion": {
+                    "Type": "Succeed"
+                    }
+                }
+                },
+                "End": true
+            }
+            }
+        }
+        ],
+        "Next": "ProcessQCWorkflow"
+    },
+    "ProcessQCWorkflow": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::states:startExecution",
+        "Parameters": {
+        "StateMachineArn": "arn:aws:states:us-east-1:123456789012:stateMachine:SFNB",
+        "Input": {
+            "WorkflowFileRef.$": "$.qcWorkflow.qcWorkflowFileRef",
+            "AHOWorkflowID.$": "$.qcWorkflow.ahoQcWorkflowId"
+        }
+        },
+        "Next": "NotifyAdministrator"
+    },
+    "NotifyAdministrator": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:NotifyAdministrator",
+        "End": true
+    }
+    }
+}

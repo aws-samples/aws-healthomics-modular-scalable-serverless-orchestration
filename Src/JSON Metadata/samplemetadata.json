@@ -1,0 +1,21 @@
+{
+    "flowcellSamples": [
+        {
+            "sampleId": "sample1",
+            "fastqFileRef": "s3://SamplesFASTQ/sample1.fastq.gz",
+            "ahoSampleWorkflowId": "arn:aws:healthomics:us-east-1:123456789012:workflow/sample-workflow",
+            "OutputS3path": "s3://SamplesFASTQOP/"
+        },
+        {
+            "sampleId": "sample2",
+            "fastqFileRef": "s3://SamplesFASTQ/sample2.fastq.gz",
+            "ahoSampleWorkflowId": "arn:aws:healthomics:us-east-1:123456789012:workflow/sample-workflow",
+            "OutputS3path": "s3://SamplesFASTQOP/"
+        }
+    ],
+    "qcWorkflow": {
+    "qcWorkflowFileRef": "s3://QCFASTQ/qc-workflow.json",
+    "ahoQcWorkflowId": "arn:aws:healthomics:us-east-1:123456789012:workflow/qc-workflow",
+    "OutputS3path": "s3://QCFASTQOP/"
+    }
+}

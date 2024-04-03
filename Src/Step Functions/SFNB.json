@@ -1,0 +1,48 @@
+{
+    "Comment": "Orchestrate AWS HealthOmics Workflow Execution",
+    "StartAt": "TriggerAHOTask",
+    "States": {
+    "TriggerAHOTask": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:TriggerAHO",
+        "ResultPath": "$.TriggerAHOResult",
+        "Next": "WaitForCompletion"
+    },
+    "WaitForCompletion": {
+        "Type": "Wait",
+        "Seconds": 300,
+        "Next": "CheckAHOTask"
+    },
+    "CheckAHOTask": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:CheckAHO",
+        "InputPath": "$.TriggerAHOResult",
+        "ResultPath": "$.CheckAHOResult",
+        "Next": "CheckStatusChoice"
+    },
+    "CheckStatusChoice": {
+        "Type": "Choice",
+        "Choices": [
+        {
+            "Variable": "$.CheckAHOResult.Status",
+            "StringEquals": "COMPLETED",
+            "Next": "SuccessState"
+        },
+        {
+            "Variable": "$.CheckAHOResult.Status",
+            "StringEquals": "FAILED",
+            "Next": "NotifyFailureTask"
+        }
+        ],
+        "Default": "WaitForCompletion"
+    },
+    "SuccessState": {
+        "Type": "Succeed"
+    },
+    "NotifyFailureTask": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:NotifyLambda",
+        "End": true
+    }
+    }
+}
