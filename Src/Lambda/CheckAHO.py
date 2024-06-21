@@ -6,7 +6,7 @@ def lambda_handler(event, context):
     execution_id = event['ExecutionId']
 
     # Call the AWS HealthOmics get_run API
-    aho = boto3.client('healthomics')
+    aho = boto3.client('omics')
     response = aho.get_run(id=execution_id)
 
     return {
