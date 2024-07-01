@@ -54,7 +54,8 @@
             }
         }
         ],
-        "Next": "ProcessQCWorkflow"
+        "Next": "ProcessQCWorkflow",
+        "ResultPath": null
     },
     "ProcessQCWorkflow": {
         "Type": "Task",
